@@ -1,10 +1,10 @@
-from typing import Any
+from typing import Any, Optional
 
 # Token types
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, EOF = 'INTEGER', 'PLUS', 'EOF'
+INTEGER, PLUS, EOF = "INTEGER", "PLUS", "EOF"
 
 
 class Token(object):
@@ -21,7 +21,7 @@ class Token(object):
             Token(INTEGER, 3)
             Token(PLUS '+')
         """
-        return f'Token({self.type}, {repr(self.value)})'
+        return f"Token({self.type}, {repr(self.value)})"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -38,7 +38,7 @@ class Interpreter(object):
         self._current_char = text[self._position]
 
     def error(self):
-        raise Exception('Error parsing input')
+        raise Exception("Error parsing input")
 
     def _advance_position(self) -> None:
         # is self.pos index past the end of the self.text ?
@@ -51,20 +51,20 @@ class Interpreter(object):
             self._current_char = self.text[self._position]
 
     def _get_integer(self) -> int:
-        result = ''
+        result = ""
         while self._current_char is not None and self._current_char.isdigit():
             result += self._current_char
             self._advance_position()
         return int(result)
 
-    def _get_next_token(self, ):
+    def _get_next_token(
+        self,
+    ):
         """Lexical analyzer (also known as scanner or tokenizer)
 
         This method is responsible for breaking a sentence
         apart into tokens. One token at a time.
         """
-        text = self.text
-
         # if the character is a digit then convert it to
         # integer, create an INTEGER token, increment self.pos
         # index to point to the next character after the digit,
@@ -72,9 +72,9 @@ class Interpreter(object):
         while self._current_char is not None:
             if self._current_char.isdigit():
                 return Token(INTEGER, self._get_integer())
-            if self._current_char == '+':
+            if self._current_char == "+":
                 self._advance_position()
-                return Token(PLUS, '+')
+                return Token(PLUS, "+")
             self.error()
         return Token(EOF, None)
 
@@ -97,7 +97,7 @@ class Interpreter(object):
         self._eat(INTEGER)
 
         # we expect the current token to be a '+' token
-        op = self._current_token
+        _ = self._current_token
         self._eat(PLUS)
 
         # we expect the current token to be a single-digit integer
@@ -117,7 +117,7 @@ class Interpreter(object):
 def main():
     while True:
         try:
-            text = input('calc> ')
+            text = input("calc> ")
         except EOFError:
             break
         if not text:
@@ -127,5 +127,5 @@ def main():
         print(result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
