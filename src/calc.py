@@ -31,15 +31,33 @@ class Interpreter(object):
     def __init__(self, text: str):
         # client string input, e.g. "3+5"
         self.text = text
-        # self.pos is an index into self.text
-        self._pos: int = 0
+        # self.position is an index into self.text
+        self._position: int = 0
         # current token instance
         self._current_token: Optional[Token] = None
+        self._current_char = text[self._position]
 
     def error(self):
         raise Exception('Error parsing input')
 
-    def _get_next_token(self):
+    def _advance_position(self) -> None:
+        # is self.pos index past the end of the self.text ?
+        # if so, then return EOF token because there is no more
+        # input left to convert into tokens
+        self._position += 1
+        if self._position > len(self.text) - 1:
+            self._current_char = None
+        else:
+            self._current_char = self.text[self._position]
+
+    def _get_integer(self) -> int:
+        result = ''
+        while self._current_char is not None and self._current_char.isdigit():
+            result += self._current_char
+            self._advance_position()
+        return int(result)
+
+    def _get_next_token(self, ):
         """Lexical analyzer (also known as scanner or tokenizer)
 
         This method is responsible for breaking a sentence
@@ -47,31 +65,18 @@ class Interpreter(object):
         """
         text = self.text
 
-        # is self.pos index past the end of the self.text ?
-        # if so, then return EOF token because there is no more
-        # input left to convert into tokens
-        if self._pos > len(text) - 1:
-            return Token(EOF, None)
-
-        # get a character at the position self.pos and decide
-        # what token to create based on the single character
-        current_char = text[self._pos]
-
         # if the character is a digit then convert it to
         # integer, create an INTEGER token, increment self.pos
         # index to point to the next character after the digit,
         # and return the INTEGER token
-        if current_char.isdigit():
-            token = Token(INTEGER, int(current_char))
-            self._pos += 1
-            return token
-
-        if current_char == '+':
-            token = Token(PLUS, current_char)
-            self._pos += 1
-            return token
-
-        self.error()
+        while self._current_char is not None:
+            if self._current_char.isdigit():
+                return Token(INTEGER, self._get_integer())
+            if self._current_char == '+':
+                self._advance_position()
+                return Token(PLUS, '+')
+            self.error()
+        return Token(EOF, None)
 
     def _eat(self, token_type: str) -> None:
         # compare the current token type with the passed token
@@ -84,7 +89,6 @@ class Interpreter(object):
             self.error()
 
     def expr(self) -> int:
-        """expr -> INTEGER PLUS INTEGER"""
         # set current token to the first token taken from the input
         self._current_token = self._get_next_token()
 
