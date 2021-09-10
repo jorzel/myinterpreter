@@ -70,6 +70,9 @@ class Interpreter(object):
         # index to point to the next character after the digit,
         # and return the INTEGER token
         while self._current_char is not None:
+            if self._current_char == " ":
+                self._advance_position()
+                continue
             if self._current_char.isdigit():
                 return Token(INTEGER, self._get_integer())
             if self._current_char == "+":
