@@ -4,7 +4,7 @@ from typing import Any, Optional
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, MINUS, MUL, EOF = "INTEGER", "PLUS", "MINUS", "MUL", "EOF"
+INTEGER, PLUS, MINUS, MUL, DIV, EOF = "INTEGER", "PLUS", "MINUS", "MUL", "DIV", "EOF"
 
 
 class Token(object):
@@ -27,7 +27,12 @@ class Token(object):
         return self.__str__()
 
 
-ops = {"+": Token(PLUS, "+"), "-": Token(MINUS, "-"), "*": Token(MUL, "*")}
+ops = {
+    "+": Token(PLUS, "+"),
+    "-": Token(MINUS, "-"),
+    "*": Token(MUL, "*"),
+    "/": Token(DIV, "/"),
+}
 
 
 class Interpreter(object):
@@ -108,8 +113,10 @@ class Interpreter(object):
             self._eat(PLUS)
         elif op.type == MINUS:
             self._eat(MINUS)
-        else:
+        elif op.type == MUL:
             self._eat(MUL)
+        else:
+            self._eat(DIV)
 
         # we expect the current token to be a single-digit integer
         right = self._current_token
@@ -125,8 +132,10 @@ class Interpreter(object):
             result = left.value + right.value
         elif op.type == MINUS:
             result = left.value - right.value
-        else:
+        elif op.type == MUL:
             result = left.value * right.value
+        else:
+            result = left.value / right.value
         return result
 
 

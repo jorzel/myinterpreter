@@ -37,3 +37,15 @@ def test_calc_multiply_two_integers(expression, expected_result):
     result = interpreter.expr()
 
     assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "expression,expected_result",
+    [("6 / 2", 3), (" 12/2", 6), ("10/ 10", 1)],
+)
+def test_calc_division_two_integers(expression, expected_result):
+    interpreter = Interpreter(expression)
+
+    result = interpreter.expr()
+
+    assert result == expected_result
