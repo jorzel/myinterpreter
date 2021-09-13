@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any, Optional
 
 # Token types
@@ -7,24 +8,16 @@ from typing import Any, Optional
 INTEGER, PLUS, MINUS, MUL, DIV, EOF = "INTEGER", "PLUS", "MINUS", "MUL", "DIV", "EOF"
 
 
-class Token(object):
-    def __init__(self, type_: str, value: Any):
-        # token type, e.g.: INTEGER, PLUS
-        self.type = type_
-        # token value, e.g.: 0, '+', or None
-        self.value = value
+@dataclass(frozen=True)
+class Token:
+    """
+    Examples:
+        Token(INTEGER, 3)
+        Token(PLUS '+')
+    """
 
-    def __str__(self) -> str:
-        """String representation of the class instance.
-
-        Examples:
-            Token(INTEGER, 3)
-            Token(PLUS '+')
-        """
-        return f"Token({self.type}, {repr(self.value)})"
-
-    def __repr__(self) -> str:
-        return self.__str__()
+    type: str
+    value: Any
 
 
 ops = {
@@ -35,7 +28,7 @@ ops = {
 }
 
 
-class Interpreter(object):
+class Interpreter:
     def __init__(self, text: str):
         # client string input, e.g. "3+5"
         self.text = text
@@ -59,6 +52,9 @@ class Interpreter(object):
             self._current_char = self.text[self._position]
 
     def _get_integer(self) -> int:
+        """
+        Return multiple digit integer by joining subsequent digit characters.
+        """
         result = ""
         while self._current_char is not None and self._current_char.isdigit():
             result += self._current_char
@@ -82,18 +78,18 @@ class Interpreter(object):
                 self._advance_position()
                 continue
             if self._current_char.isdigit():
-                return Token(INTEGER, self._get_integer())
+                return Token(type=INTEGER, value=self._get_integer())
             if self._current_char in ops:
                 token = ops[self._current_char]
                 self._advance_position()
                 return token
-        return Token(EOF, None)
+        return Token(type=EOF, value=None)
 
     def _eat(self, token_type: str) -> None:
-        # compare the current token type with the passed token
-        # type and if they match then "eat" the current token
-        # and assign the next token to the self.current_token,
-        # otherwise raise an exception.
+        """Compare the current token type with the passed token
+        type and if they match then "eat" the current token
+        and assign the next token to the self.current_token,
+        otherwise raise an exception."""
         if self._current_token.type == token_type:
             self._current_token = self._get_next_token()
         else:
@@ -105,6 +101,9 @@ class Interpreter(object):
         return token.value
 
     def expr(self) -> int:
+        """
+        Arithmetic expression interprter / parser
+        """
         self._current_token = self._get_next_token()
         result = self._term()
         while self._current_token.type != EOF:
