@@ -4,14 +4,14 @@ from typing import Any, Optional
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, MINUS, EOF = "INTEGER", "PLUS", "MINUS", "EOF"
+INTEGER, PLUS, MINUS, MUL, EOF = "INTEGER", "PLUS", "MINUS", "MUL", "EOF"
 
 
 class Token(object):
     def __init__(self, type_: str, value: Any):
-        # token type: INTEGER, PLUS, or EOF
+        # token type, e.g.: INTEGER, PLUS
         self.type = type_
-        # token value: 0, 1, 2. 3, 4, 5, 6, 7, 8, 9, '+', or None
+        # token value, e.g.: 0, '+', or None
         self.value = value
 
     def __str__(self) -> str:
@@ -81,6 +81,9 @@ class Interpreter(object):
             if self._current_char == "-":
                 self._advance_position()
                 return Token(MINUS, "-")
+            if self._current_char == "*":
+                self._advance_position()
+                return Token(MUL, "*")
             self.error()
         return Token(EOF, None)
 
@@ -106,8 +109,10 @@ class Interpreter(object):
         op = self._current_token
         if op.type == PLUS:
             self._eat(PLUS)
-        else:
+        elif op.type == MINUS:
             self._eat(MINUS)
+        else:
+            self._eat(MUL)
 
         # we expect the current token to be a single-digit integer
         right = self._current_token
@@ -121,8 +126,10 @@ class Interpreter(object):
         # effectively interpreting client input
         if op.type == PLUS:
             result = left.value + right.value
-        else:
+        elif op.type == MINUS:
             result = left.value - right.value
+        else:
+            result = left.value * right.value
         return result
 
 

@@ -25,3 +25,15 @@ def test_calc_subtraction_two_integers(expression, expected_result):
     result = interpreter.expr()
 
     assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "expression,expected_result",
+    [("3*2", 6), (" 12*2", 24), ("10* 10", 100)],
+)
+def test_calc_multiply_two_integers(expression, expected_result):
+    interpreter = Interpreter(expression)
+
+    result = interpreter.expr()
+
+    assert result == expected_result
