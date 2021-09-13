@@ -27,6 +27,9 @@ class Token(object):
         return self.__str__()
 
 
+ops = {"+": Token(PLUS, "+"), "-": Token(MINUS, "-"), "*": Token(MUL, "*")}
+
+
 class Interpreter(object):
     def __init__(self, text: str):
         # client string input, e.g. "3+5"
@@ -37,7 +40,7 @@ class Interpreter(object):
         self._current_token: Optional[Token] = None
         self._current_char = text[self._position]
 
-    def error(self):
+    def error(self) -> None:
         raise Exception("Error parsing input")
 
     def _advance_position(self) -> None:
@@ -75,16 +78,10 @@ class Interpreter(object):
                 continue
             if self._current_char.isdigit():
                 return Token(INTEGER, self._get_integer())
-            if self._current_char == "+":
+            if self._current_char in ops:
+                token = ops[self._current_char]
                 self._advance_position()
-                return Token(PLUS, "+")
-            if self._current_char == "-":
-                self._advance_position()
-                return Token(MINUS, "-")
-            if self._current_char == "*":
-                self._advance_position()
-                return Token(MUL, "*")
-            self.error()
+                return token
         return Token(EOF, None)
 
     def _eat(self, token_type: str) -> None:
