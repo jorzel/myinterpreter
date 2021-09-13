@@ -99,37 +99,28 @@ class Interpreter(object):
         else:
             self.error()
 
-    def expr(self) -> int:
-        # set current token to the first token taken from the input
-        self._current_token = self._get_next_token()
+    def _term(self) -> Any:
+        token = self._current_token
+        self._eat(token.type)
+        return token.value
 
-        # we expect the current token to be a single-digit integer
-        left = self._current_token
-        result = left.value
-        self._eat(INTEGER)
-        op = None
+    def expr(self) -> int:
+        self._current_token = self._get_next_token()
+        result = self._term()
         while self._current_token.type != EOF:
-            if self._current_token.type == INTEGER:
-                right = self._current_token
-                if op.type == PLUS:
-                    result = result + right.value
-                elif op.type == MINUS:
-                    result = result - right.value
-                elif op.type == MUL:
-                    result = result * right.value
-                else:
-                    result = result / right.value
-                self._eat(INTEGER)
-            else:
-                op = self._current_token
-                if op.type == PLUS:
+            if self._current_token.type in (MINUS, PLUS, DIV, MUL):
+                if self._current_token.type == PLUS:
                     self._eat(PLUS)
-                elif op.type == MINUS:
+                    result = result + self._term()
+                elif self._current_token.type == MINUS:
                     self._eat(MINUS)
-                elif op.type == MUL:
+                    result = result - self._term()
+                elif self._current_token.type == MUL:
                     self._eat(MUL)
+                    result = result * self._term()
                 else:
                     self._eat(DIV)
+                    result = result / self._term()
         return result
 
 
