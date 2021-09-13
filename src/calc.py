@@ -105,37 +105,31 @@ class Interpreter(object):
 
         # we expect the current token to be a single-digit integer
         left = self._current_token
+        result = left.value
         self._eat(INTEGER)
-
-        # we expect the current token to be a '+' token
-        op = self._current_token
-        if op.type == PLUS:
-            self._eat(PLUS)
-        elif op.type == MINUS:
-            self._eat(MINUS)
-        elif op.type == MUL:
-            self._eat(MUL)
-        else:
-            self._eat(DIV)
-
-        # we expect the current token to be a single-digit integer
-        right = self._current_token
-        self._eat(INTEGER)
-        # after the above call the self.current_token is set to
-        # EOF token
-
-        # at this point INTEGER PLUS INTEGER sequence of tokens
-        # has been successfully found and the method can just
-        # return the result of adding two integers, thus
-        # effectively interpreting client input
-        if op.type == PLUS:
-            result = left.value + right.value
-        elif op.type == MINUS:
-            result = left.value - right.value
-        elif op.type == MUL:
-            result = left.value * right.value
-        else:
-            result = left.value / right.value
+        op = None
+        while self._current_token.type != EOF:
+            if self._current_token.type == INTEGER:
+                right = self._current_token
+                if op.type == PLUS:
+                    result = result + right.value
+                elif op.type == MINUS:
+                    result = result - right.value
+                elif op.type == MUL:
+                    result = result * right.value
+                else:
+                    result = result / right.value
+                self._eat(INTEGER)
+            else:
+                op = self._current_token
+                if op.type == PLUS:
+                    self._eat(PLUS)
+                elif op.type == MINUS:
+                    self._eat(MINUS)
+                elif op.type == MUL:
+                    self._eat(MUL)
+                else:
+                    self._eat(DIV)
         return result
 
 
