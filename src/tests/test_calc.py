@@ -50,7 +50,7 @@ def test_calc_subtraction_two_integers(expression, expected_result):
         ("2+3+6+9+10+1+2-1", 32),
     ],
 )
-def test_calc_adding__or_subtracting_several_integers(expression, expected_result):
+def test_calc_adding_or_subtracting_several_integers(expression, expected_result):
     interpreter = Interpreter(expression)
 
     result = interpreter.expr()
@@ -75,6 +75,24 @@ def test_calc_multiply_two_integers(expression, expected_result):
     [("6 / 2", 3), (" 12/2", 6), ("10/ 10", 1)],
 )
 def test_calc_division_two_integers(expression, expected_result):
+    interpreter = Interpreter(expression)
+
+    result = interpreter.expr()
+
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "expression,expected_result",
+    [
+        ("1 *2 / 1", 2),
+        ("1*1*1", 1),
+        ("2*8/4", 4),
+        ("12/2*5", 30),
+        ("15/15*2*2", 4),
+    ],
+)
+def test_calc_multiply_or_divide_several_integers(expression, expected_result):
     interpreter = Interpreter(expression)
 
     result = interpreter.expr()
