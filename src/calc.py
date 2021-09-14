@@ -5,7 +5,16 @@ from typing import Any, Optional
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, MINUS, MUL, DIV, EOF = "INTEGER", "PLUS", "MINUS", "MUL", "DIV", "EOF"
+INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF = (
+    "INTEGER",
+    "PLUS",
+    "MINUS",
+    "MUL",
+    "DIV",
+    "LPAREN",
+    "RPAREN",
+    "EOF",
+)
 
 
 @dataclass(frozen=True)
@@ -53,6 +62,12 @@ class Lexer:
             if self._current_char == " ":
                 self._advance_position()
                 continue
+            if self._current_char == "(":
+                self._advance_position()
+                return Token(type=LPAREN, value="(")
+            if self._current_char == ")":
+                self._advance_position()
+                return Token(type=RPAREN, value=")")
             if self._current_char.isdigit():
                 return Token(type=INTEGER, value=self._get_integer())
             if self._current_char in ops:
@@ -98,14 +113,13 @@ class Interpreter:
         factor: INTEGER
         """
         result = self._term()
-        while self._current_token is not None and self._current_token.type != EOF:
-            if self._current_token.type in (MINUS, PLUS, DIV, MUL):
-                if self._current_token.type == PLUS:
-                    self._eat(PLUS)
-                    result = result + self._term()
-                elif self._current_token.type == MINUS:
-                    self._eat(MINUS)
-                    result = result - self._term()
+        while self._current_token.type in (MINUS, PLUS):
+            if self._current_token.type == PLUS:
+                self._eat(PLUS)
+                result = result + self._term()
+            elif self._current_token.type == MINUS:
+                self._eat(MINUS)
+                result = result - self._term()
         return result
 
     def _error(self) -> None:
@@ -134,8 +148,14 @@ class Interpreter:
 
     def _factor(self) -> Any:
         token = self._current_token
-        self._eat(token.type)
-        return token.value
+        if token.type == LPAREN:
+            self._eat(LPAREN)
+            result = self.expr()
+            self._eat(RPAREN)
+            return result
+        else:
+            self._eat(token.type)
+            return token.value
 
 
 def main():
