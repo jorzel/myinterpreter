@@ -72,9 +72,11 @@ class Lexer:
         return int(result)
 
     def _advance_position(self) -> None:
-        # is self.pos index past the end of the self.text ?
-        # if so, then return EOF token because there is no more
-        # input left to convert into tokens
+        """
+        Is self.pos index past the end of the self.text ?
+        if so, then set :attr:`_current_char` as None because there is no more
+        input left to convert into tokens
+        """
         self._position += 1
         if self._position > len(self.text) - 1:
             self._current_char = None
@@ -100,12 +102,6 @@ class Interpreter:
                 elif self._current_token.type == MINUS:
                     self._eat(MINUS)
                     result = result - self._term()
-                elif self._current_token.type == MUL:
-                    self._eat(MUL)
-                    result = result * self._term()
-                else:
-                    self._eat(DIV)
-                    result = result / self._term()
         return result
 
     def _error(self) -> None:
@@ -122,6 +118,17 @@ class Interpreter:
             self._error()
 
     def _term(self) -> Any:
+        result = self._factor()
+        while self._current_token.type in (MUL, DIV):
+            if self._current_token.type == MUL:
+                self._eat(MUL)
+                result = result * self._factor()
+            else:
+                self._eat(DIV)
+                result = result / self._factor()
+        return result
+
+    def _factor(self) -> Any:
         token = self._current_token
         self._eat(token.type)
         return token.value

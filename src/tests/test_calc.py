@@ -98,3 +98,23 @@ def test_calc_multiply_or_divide_several_integers(expression, expected_result):
     result = interpreter.expr()
 
     assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "expression,expected_result",
+    [
+        ("1 + 2 / 1", 3),
+        ("1*1+1-8*2+10", -4),
+        ("2*8+4-2", 18),
+        ("1+ 12 / 2 * 5", 31),
+        ("12 - 8 / 2 * 1 * 2 / 8 + 1", 12),
+    ],
+)
+def test_calc_add_subtrack_multiply_or_divide_several_integers(
+    expression, expected_result
+):
+    interpreter = Interpreter(expression)
+
+    result = interpreter.expr()
+
+    assert result == expected_result
