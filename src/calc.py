@@ -28,44 +28,20 @@ ops = {
 }
 
 
-class Interpreter:
+class Lexer:
+    """Lexical analyzer (also known as scanner or tokenizer)"""
+
     def __init__(self, text: str):
         # client string input, e.g. "3+5"
         self.text = text
         # self.position is an index into self.text
         self._position: int = 0
-        # current token instance
-        self._current_token: Optional[Token] = None
-        self._current_char = text[self._position]
+        self._current_char: Optional[str] = text[self._position]
 
-    def error(self) -> None:
-        raise Exception("Error parsing input")
-
-    def _advance_position(self) -> None:
-        # is self.pos index past the end of the self.text ?
-        # if so, then return EOF token because there is no more
-        # input left to convert into tokens
-        self._position += 1
-        if self._position > len(self.text) - 1:
-            self._current_char = None
-        else:
-            self._current_char = self.text[self._position]
-
-    def _get_integer(self) -> int:
-        """
-        Return multiple digit integer by joining subsequent digit characters.
-        """
-        result = ""
-        while self._current_char is not None and self._current_char.isdigit():
-            result += self._current_char
-            self._advance_position()
-        return int(result)
-
-    def _get_next_token(
+    def get_next_token(
         self,
     ):
-        """Lexical analyzer (also known as scanner or tokenizer)
-
+        """
         This method is responsible for breaking a sentence
         apart into tokens. One token at a time.
         """
@@ -85,28 +61,38 @@ class Interpreter:
                 return token
         return Token(type=EOF, value=None)
 
-    def _eat(self, token_type: str) -> None:
-        """Compare the current token type with the passed token
-        type and if they match then "eat" the current token
-        and assign the next token to the self.current_token,
-        otherwise raise an exception."""
-        if self._current_token.type == token_type:
-            self._current_token = self._get_next_token()
-        else:
-            self.error()
+    def _get_integer(self) -> int:
+        """
+        Return multiple digit integer by joining subsequent digit characters.
+        """
+        result = ""
+        while self._current_char is not None and self._current_char.isdigit():
+            result += self._current_char
+            self._advance_position()
+        return int(result)
 
-    def _term(self) -> Any:
-        token = self._current_token
-        self._eat(token.type)
-        return token.value
+    def _advance_position(self) -> None:
+        # is self.pos index past the end of the self.text ?
+        # if so, then return EOF token because there is no more
+        # input left to convert into tokens
+        self._position += 1
+        if self._position > len(self.text) - 1:
+            self._current_char = None
+        else:
+            self._current_char = self.text[self._position]
+
+
+class Interpreter:
+    def __init__(self, text: str):
+        self._lexer = Lexer(text)
+        self._current_token: Token = self._lexer.get_next_token()
 
     def expr(self) -> int:
         """
         Arithmetic expression interprter / parser
         """
-        self._current_token = self._get_next_token()
         result = self._term()
-        while self._current_token.type != EOF:
+        while self._current_token is not None and self._current_token.type != EOF:
             if self._current_token.type in (MINUS, PLUS, DIV, MUL):
                 if self._current_token.type == PLUS:
                     self._eat(PLUS)
@@ -121,6 +107,24 @@ class Interpreter:
                     self._eat(DIV)
                     result = result / self._term()
         return result
+
+    def _error(self) -> None:
+        raise Exception("Error parsing input")
+
+    def _eat(self, token_type: str) -> None:
+        """Compare the current token type with the passed token
+        type and if they match then "eat" the current token
+        and assign the next token to the self.current_token,
+        otherwise raise an exception."""
+        if self._current_token.type == token_type:
+            self._current_token = self._lexer.get_next_token()
+        else:
+            self._error()
+
+    def _term(self) -> Any:
+        token = self._current_token
+        self._eat(token.type)
+        return token.value
 
 
 def main():
