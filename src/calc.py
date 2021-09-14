@@ -92,6 +92,10 @@ class Interpreter:
     def expr(self) -> int:
         """
         Arithmetic expression interprter / parser
+        Grammar:
+        expr: term((PLUS|MINUS)term)*
+        term: factor((MUL|DIV)factor)*
+        factor: INTEGER
         """
         result = self._term()
         while self._current_token is not None and self._current_token.type != EOF:
