@@ -1,1 +1,1 @@
-# myinterpreter
+Playground for maginificent tutorial from: https://ruslanspivak.com/lsbasi-part1/
